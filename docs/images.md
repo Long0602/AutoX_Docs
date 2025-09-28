@@ -543,6 +543,7 @@ toast(colors.toString(color));
 - `options` {Object} 选项包括：
   - `region` {Array} 找色区域。是一个两个或四个元素的数组。(region[0], region[1]) 表示找色区域的左上角；region[2]*region[3]表示找色区域的宽高。如果只有 region 只有两个元素，则找色区域为 (region[0], region[1]) 到屏幕右下角。如果不指定 region 选项，则找色区域为整张图片。
   - `threshold` {number} 找色时颜色相似度的临界值，范围为 0~255（越小越相似，0 为颜色相等，255 为任何颜色都能匹配）。默认为 4。threshold 和浮点数相似度 (0.0~1.0) 的换算为 similarity = (255 - threshold) / 255.
+  - `similarity` {number} 找色时颜色相似度，范围为 0~1（越大越相似，1 为颜色相等，0 为任何颜色都能匹配）。与 threshold 参数二选一，同时存在则以 similarity 为准。
 
 在图片中寻找颜色 color。找到时返回找到的点 Point，找不到时返回 null。
 
@@ -677,7 +678,6 @@ var p = images.findMultiColors(img, "#123456", [[10, 20, "#ffffff"], [30, 40, "#
     * "equal": 相等匹配，只有与给定颜色 color 完全相等时才匹配。
     * "diff": 差值匹配。与给定颜色的 R、G、B 差的绝对值之和小于 threshold 时匹配。
     * "rgb": rgb 欧拉距离相似度。与给定颜色 color 的 rgb 欧拉距离小于等于 threshold 时匹配。
- 
     * "rgb+": 加权 rgb 欧拉距离匹配 ([LAB Delta E](https://en.wikipedia.org/wiki/Color_difference))。
     * "hs": hs 欧拉距离匹配。hs 为 HSV 空间的色调值。
 
@@ -707,11 +707,14 @@ if(images.detectsColor(img, "#fed9a8", x, y)){
 * `img` {Image} 大图片
 * `template` {Image} 小图片（模板）
 * `options` {Object} 选项包括：
-  - `threshold` {number} 图片相似度。取值范围为 0~1 的浮点数。默认值为 0.9。
+  - `threshold` {number} 图片相似度。取值范围为 0~1 的浮点数。默认值为 0.9。该值用于检验最终匹配结果，以及在每一轮匹配中如果相似度大于该值则直接返回匹配结果。
+  - `weakThreshold` {number} 弱阈值。取值范围为 0~1 的浮点数。默认值为 0.6。该值用于在每一轮模板匹配中检验是否继续匹配。如果相似度小于该值，则不再继续匹配。
   - `region` {Array} 找图区域。参见 findColor 函数关于 region 的说明。
   - `level` {number} **一般而言不必修改此参数**。不加此参数时该参数会根据图片大小自动调整。找图算法是采用图像金字塔进行的，level 参数表示金字塔的层次，level 越大可能带来越高的找图效率，但也可能造成找图失败（图片因过度缩小而无法分辨）或返回错误位置。因此，除非您清楚该参数的意义并需要进行性能调优，否则不需要用到该参数。
 
 找图。在大图片 img 中查找小图片 template 的位置（模块匹配），找到时返回位置坐标 (Point)，找不到时返回 null。
+
+该函数内部会自动将图片转换为灰度图进行匹配，以提高匹配效率和准确性。
 
 该函数也可以作为全局函数使用。
 
@@ -762,13 +765,16 @@ images.findImage(img, template, {
 * `img` {Image} 大图片
 * `template` {Image} 小图片（模板）
 * `options` {Object} 找图选项：
-    * `threshold` {number} 图片相似度。取值范围为 0~1 的浮点数。默认值为 0.9。
+    * `threshold` {number} 图片相似度。取值范围为 0~1 的浮点数。默认值为 0.9。该值用于检验最终匹配结果，以及在每一轮匹配中如果相似度大于该值则直接返回匹配结果。
+    * `weakThreshold` {number} 弱阈值。取值范围为 0~1 的浮点数。默认值为 0.6。该值用于在每一轮模板匹配中检验是否继续匹配。如果相似度小于该值，则不再继续匹配。
     * `region` {Array} 找图区域。参见 findColor 函数关于 region 的说明。
     * `max` {number} 找图结果最大数量，默认为 5
     * `level` {number} **一般而言不必修改此参数**。不加此参数时该参数会根据图片大小自动调整。找图算法是采用图像金字塔进行的，level 参数表示金字塔的层次，level 越大可能带来越高的找图效率，但也可能造成找图失败（图片因过度缩小而无法分辨）或返回错误位置。因此，除非您清楚该参数的意义并需要进行性能调优，否则不需要用到该参数。
 * 返回 {MatchingResult}
 
 在大图片中搜索小图片，并返回搜索结果 MatchingResult。该函数可以用于找图时找出多个位置，可以通过 max 参数控制最大的结果数量。也可以对匹配结果进行排序、求最值等操作。
+
+该函数内部会自动将图片转换为灰度图进行匹配，以提高匹配效率和准确性。
 
 ## images.findCircles(gray, options)
 - `gray` {Image} 灰度图片
