@@ -266,4 +266,24 @@ console.setBackgroud("#33ef0000");
 ```js
 console.setMaxLines(500);  
 ```
-## console.setBackground()
+## console.setBackground(color)
+* `color` {string} 背景色，支持rgba格式
+
+设置控制台背景颜色。
+
+## console.setTitle(title[, color, size])
+* `title` {string} 标题文字
+* `color` {string} 标题颜色，支持rgba格式，默认为"#fe14efb1"
+* `size` {number} 标题字号，自动根据字号调整标题高度
+
+设置控制台标题。
+
+## console.setLogSize(size)
+* `size` {number} 字号大小
+
+设置控制台日志字体大小。
+
+## console.setCanInput(can)
+* `can` {boolean} 是否可以输入
+
+设置控制台是否可以输入。当设置为true时，控制台会显示输入框，允许用户输入命令。
